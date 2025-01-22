@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>Test Group: {{ group.name }}</h1>
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="commands" class="form-label">Add Test Command:</label>
+                    <textarea name="commands" id="commands" class="form-control"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="file" class="form-label">Upload Test File:</label>
+                    <input type="file" name="file" id="file" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-success">Add Tests</button>
+            </form>
+        </div>
+    </div>
+
+    <h2>Test Blocks</h2>
+    <div class="mb-3">
+        <input type="text" id="searchInput" class="form-control" placeholder="Search for test commands...">
+    </div>
+    <div class="table-responsive">
+        <table class="table table-bordered" id="testTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Commands</th>
+                    <th>Result</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for block in test_blocks %}
+                <tr>
+                    <td>{{ block.id }}</td>
+                    <td style="text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        <span title="{{ block.commands | e }}">
+                            {{ block.commands.strip()[:25] + ('...' if block.commands.strip()|length > 25 else '') }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if block.result == "✅" %}
+                            <span class="text-success">{{ block.result }}</span>
+                        {% elif block.result == "❌" %}
+                            <span class="text-danger">{{ block.result }}</span>
+                        {% else %}
+                            <span class="text-warning">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('run_test', block_id=block.id) }}" class="btn btn-primary btn-sm">Run</a>
+                        <a href="{{ url_for('view_report', block_id=block.id) }}" class="btn btn-secondary btn-sm">Report</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Home</a>
+</div>
+
+<script>
+    // JavaScript for filtering table rows
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        let input = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#testTable tbody tr');
+        
+        rows.forEach(row => {
+            let commands = row.querySelector('td:nth-child(2)').innerText.toLowerCase();
+            row.style.display = commands.includes(input) ? '' : 'none';
+        });
+    });
+</script>
+{% endblock %}

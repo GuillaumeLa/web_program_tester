@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between mb-4">
+        <!-- Bouton "Back to Group" à gauche -->
+        <a href="{{ url_for('view_group', group_id=group_id) }}" class="btn btn-secondary">Back to Group</a>
+
+        <!-- Bouton "Run Next Test" à droite -->
+        {% if next_block %}
+            <a href="{{ url_for('run_test', block_id=next_block.id) }}" class="btn btn-success">Run Next Test</a>
+        {% else %}
+            <button class="btn btn-success" disabled>No More Tests</button>
+        {% endif %}
+    </div>
+
+    <h1>Test Execution Result</h1>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5>Commands Executed:</h5>
+            <pre>{{ commands }}</pre>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5>Execution Output:</h5>
+            <pre>{{ stdout }}</pre>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5>Execution Errors:</h5>
+            <pre class="text-danger">{{ stderr }}</pre>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5>Test Result:</h5>
+            {% if result == "✅" %}
+                <span class="badge bg-success">{{ result }}</span>
+            {% else %}
+                <span class="badge bg-danger">{{ result }}</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5>Valgrind Report:</h5>
+            <a href="{{ url_for('view_report', block_id=block_id) }}" class="btn btn-primary">View Full Report</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

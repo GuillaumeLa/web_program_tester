@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h1>Test Groups</h1>
+    <form action="{{ url_for('create_group') }}" method="POST" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="group_name" class="form-control" placeholder="Enter new group name" required>
+            <button type="submit" class="btn btn-primary">Create Group</button>
+        </div>
+    </form>
+    <div class="list-group">
+        {% for group in groups %}
+        <a href="{{ url_for('view_group', group_id=group.id) }}" class="list-group-item">
+            {{ group.name }}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
