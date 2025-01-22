@@ -124,13 +124,6 @@ def run_test(block_id):
         next_block=next_block
     )
 
-
-
-
-
-
-
-
 @app.route('/report/<int:block_id>')
 def view_report(block_id):
     block = TestBlock.query.get_or_404(block_id)
@@ -155,7 +148,10 @@ def view_report(block_id):
         "possibly_lost": extract_memory_leak(report_content, "possibly lost"),
     }
 
-    # Filter errors excluding readline
+    # Filter "still reachable" errors excluding libreadline
+    still_reachable = extract_still_reachable_blocks(report_content)
+
+    # Filter other errors excluding readline
     filtered_errors = extract_non_readline_errors(report_content)
 
     return render_template(
@@ -164,6 +160,7 @@ def view_report(block_id):
         summary=summary,
         report_content=report_content,
         filtered_errors=filtered_errors,
+        still_reachable=still_reachable,
     )
 
 
@@ -175,7 +172,38 @@ def extract_memory_leak(report_content, key):
                 return parts[1].strip().split()[0]
     return "0 bytes"
 
+
+def extract_still_reachable_blocks(report_content):
+    """
+    Extracts 'still reachable' memory blocks, excluding those from libreadline.
+    """
+    blocks = []
+    capturing = False
+    block_lines = []
+
+    for line in report_content.splitlines():
+        if "still reachable in loss record" in line:
+            capturing = True
+            block_lines = [line]  # Start capturing a block
+        elif capturing and line.startswith("=="):
+            capturing = False
+            # Only keep blocks not related to libreadline
+            if not any("libreadline.so" in bl for bl in block_lines):
+                blocks.append("\n".join(block_lines))
+        elif capturing:
+            block_lines.append(line)
+
+    # Add the last block if it was being captured
+    if capturing and not any("libreadline.so" in bl for bl in block_lines):
+        blocks.append("\n".join(block_lines))
+
+    return blocks
+
+
 def extract_non_readline_errors(report_content):
+    """
+    Extracts errors excluding those related to readline.
+    """
     errors = []
     capturing = False
     error_buffer = []
@@ -196,6 +224,7 @@ def extract_non_readline_errors(report_content):
         errors.append("\n".join(error_buffer))
 
     return errors
+
 def create_group_ut(group_name):
     if not group_name.strip():
         return "Erreur : le nom du groupe ne peut pas être vide."

@@ -29,14 +29,13 @@ session = Session()
 # Function to execute tests with Valgrind
 def execute_tests(group_id=None, restart_all=False):
     # Run `make re` before starting tests
-    print("Running `make re` to rebuild the project...")
-    try:
-        subprocess.run(["make", "re"], check=True, text=True)
-        print("`make re` completed successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"`make re` failed with error: {e}")
-        return
-
+    # print("Running `make re` to rebuild the project...")
+    # try:
+    #     subprocess.run(["make", "re"], check=True, text=True)
+    #     print("`make re` completed successfully.")
+    # except subprocess.CalledProcessError as e:
+    #     print(f"`make re` failed with error: {e}")
+    #     return
     # Fetch all tests for the group or pending tests for the group
     if group_id is None:
         print("No group selected. Exiting.")
